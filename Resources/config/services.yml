@@ -1,0 +1,27 @@
+services:
+    # Base validator from justinrainbow/schema-validator
+    json_schema.base_validator:
+        class: JsonSchema\Validator
+        public: false
+
+    # File generator service
+    json_schema.file_generator:
+        class: Bcastellano\JsonSchemaBundle\Generator\CliSchemaFileGenerator
+        arguments: []
+        public: false
+
+    # Validator class
+    json_schema.validator:
+        class: Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator
+        arguments:
+            - "@json_schema.base_validator"
+            - "@json_schema.file_generator"
+            - "%json_schema.resources_dir%"
+            - "@logger"
+
+    # Subscriber to auto validate request and responses bodies
+    json_schema.validator.subscriber:
+        class: Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidatorSubscriber
+        arguments: ["@json_schema.validator"]
+        tags:
+            - { name: kernel.event_subscriber }
