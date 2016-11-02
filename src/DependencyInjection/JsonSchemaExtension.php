@@ -26,7 +26,7 @@ class JsonSchemaExtension extends Extension
         $loader->load('services.yml');
 
         // add configuration as parameters
-        $container->setParameter($this->getAlias().'.resources_dir', $config['resources_dir']);
+        $container->setParameter('json_schema.resources_dir', $config['resources_dir']);
 
         // remove subscriber
         if (false == $config['use_listener']) {
