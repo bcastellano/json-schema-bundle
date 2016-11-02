@@ -29,7 +29,7 @@ class JsonSchemaExtension extends Extension
         $container->setParameter('json_schema.resources_dir', $config['resources_dir']);
 
         // remove subscriber
-        if (false == $config['use_listener']) {
+        if (false === $config['use_listener']) {
             $container->removeDefinition('json_schema.validator.subscriber');
         }
 

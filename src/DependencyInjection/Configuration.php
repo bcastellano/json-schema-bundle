@@ -11,9 +11,9 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
 
-        $rootNode = $treeBuilder
-            ->root('json_schema')
-            ->children()
+        $rootNode = $treeBuilder->root('json_schema');
+
+        $rootNode->children()
                 ->scalarNode('resources_dir')
                     ->defaultValue('%kernel.root_dir%/../src/Resources/Schemas')
                 ->end()
