@@ -32,14 +32,14 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
         $this->extension->load(['json_schema' => ['resources_dir' => '/some/dir']], $this->container);
 
         $this->assertContainerHasDefinition('json_schema.base_validator');
-        $this->assertContainerHasDefinition('json_schema.file_generator');
+        $this->assertContainerNotHasDefinition('json_schema.file_generator');
         $this->assertContainerHasDefinition('json_schema.validator');
         $this->assertContainerHasDefinition('json_schema.validator.subscriber');
         $this->assertContainerParameter('/some/dir', 'json_schema.resources_dir');
 
         $this->assertFalse($this->container->getDefinition('json_schema.base_validator')->isPublic());
-        $this->assertFalse($this->container->getDefinition('json_schema.file_generator')->isPublic());
         $this->assertTrue($this->container->getDefinition('json_schema.validator.subscriber')->hasTag('kernel.event_subscriber'));
+        $this->assertNull($this->container->getDefinition('json_schema.validator')->getArgument(2));
     }
 
     public function testDisableSubscriber()
@@ -55,6 +55,7 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
 
         $def = $this->container->getDefinition('json_schema.file_generator');
 
+        $this->assertFalse($def->isPublic());
         $this->assertEquals(['/path/to/cmd'], $def->getArguments());
     }
 

@@ -47,6 +47,11 @@ class JsonSchemaExtension extends Extension
                 default:
                     throw new \Exception('Invalid configuration values for json_schema.schema_generator');
             }
+        } else {
+            $container->removeDefinition('json_schema.file_generator');
+            if ($def=$container->getDefinition('json_schema.validator')) {
+                $def->replaceArgument(2, null);
+            }
         }
     }
 

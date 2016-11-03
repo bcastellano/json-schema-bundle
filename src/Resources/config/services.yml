@@ -15,8 +15,8 @@ services:
         class: Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator
         arguments:
             - "@json_schema.base_validator"
-            - "@json_schema.file_generator"
             - "%json_schema.resources_dir%"
+            - "@json_schema.file_generator"
             - "@logger"
 
     # Subscriber to auto validate request and responses bodies

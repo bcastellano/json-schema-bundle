@@ -2,6 +2,7 @@
 
 namespace Bcastellano\JsonSchemaBundle\Validator;
 
+use Bcastellano\JsonSchemaBundle\Exception\JsonSchemaFileNotFoundException;
 use Bcastellano\JsonSchemaBundle\Exception\JsonSchemaValidationException;
 use Bcastellano\JsonSchemaBundle\Generator\SchemaFileGeneratorInterface;
 use JsonSchema\Constraints\ConstraintInterface;
@@ -18,20 +19,24 @@ class JsonSchemaValidator implements JsonSchemaValidatorInterface
 
     public function __construct(
         ConstraintInterface $validator,
-        SchemaFileGeneratorInterface $schemaFileGenerator,
         $resourcesDir,
+        SchemaFileGeneratorInterface $schemaFileGenerator = null,
         LoggerInterface $logger = null
     ){
         $this->validator = $validator;
-        $this->schemaFileGenerator = $schemaFileGenerator;
         $this->resourcesDir = $resourcesDir;
+        $this->schemaFileGenerator = $schemaFileGenerator;
         $this->logger = $logger;
     }
 
     public function validateJson($json, $schemaFile)
     {
         if (!file_exists($schemaFile)) {
-            $this->schemaFileGenerator->generate($schemaFile, $json);
+            if ($this->schemaFileGenerator) {
+                $this->schemaFileGenerator->generate($schemaFile, $json);
+            } else {
+                throw new JsonSchemaFileNotFoundException($schemaFile);
+            }
         }
 
         // check if json validates against schemaFile
