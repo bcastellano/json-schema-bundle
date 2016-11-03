@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/bcastellano/json-schema-bundle.svg?branch=master)](https://travis-ci.org/bcastellano/json-schema-bundle)
+[![Coverage Status](https://coveralls.io/repos/github/bcastellano/json-schema-bundle/badge.svg?branch=master)](https://coveralls.io/github/bcastellano/json-schema-bundle?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/12914036-bfdb-4ba1-b89a-9f0733e0a7a3/mini.png)](https://insight.sensiolabs.com/projects/12914036-bfdb-4ba1-b89a-9f0733e0a7a3)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
 
