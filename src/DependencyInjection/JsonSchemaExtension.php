@@ -25,8 +25,6 @@ class JsonSchemaExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-        // TODO modify directly services instead of set parameters, and move services.yml definitions to extension
-
         // add configuration as parameters
         $container->setParameter('json_schema.locator.resources_dir', $config['locator']['resources_dir']);
         $container->setParameter('json_schema.locator.class', $config['locator']['class']);
