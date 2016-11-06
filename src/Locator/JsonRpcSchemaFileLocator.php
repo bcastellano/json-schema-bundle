@@ -24,7 +24,7 @@ class JsonRpcSchemaFileLocator implements SchemaFileLocatorInterface
     {
         static $method;
 
-        if (null == $method) {
+        if (null === $method) {
             $json = json_decode($request->getContent(), true);
 
             if (isset($json['method'])) {
