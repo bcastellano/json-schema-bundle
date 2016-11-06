@@ -5,6 +5,7 @@ namespace Bcastellano\JsonSchemaBundle\Validator;
 use Bcastellano\JsonSchemaBundle\Exception\JsonSchemaFileNotFoundException;
 use Bcastellano\JsonSchemaBundle\Exception\JsonSchemaValidationException;
 use Bcastellano\JsonSchemaBundle\Generator\SchemaFileGeneratorInterface;
+use Bcastellano\JsonSchemaBundle\Locator\SchemaFileLocatorInterface;
 use JsonSchema\Constraints\ConstraintInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,23 +13,41 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JsonSchemaValidator implements JsonSchemaValidatorInterface
 {
-    protected $resourcesDir;
+    /** @var ConstraintInterface */
     protected $validator;
+
+    /** @var SchemaFileLocatorInterface */
+    protected $schemaFileLocator;
+
+    /** @var SchemaFileGeneratorInterface|null */
     protected $schemaFileGenerator;
+
+    /** @var LoggerInterface|null */
     protected $logger;
 
+    /**
+     * JsonSchemaValidator constructor.
+     *
+     * @param ConstraintInterface $validator
+     * @param SchemaFileLocatorInterface $schemaFileLocator
+     * @param SchemaFileGeneratorInterface|null $schemaFileGenerator
+     * @param LoggerInterface|null $logger
+     */
     public function __construct(
         ConstraintInterface $validator,
-        $resourcesDir,
+        SchemaFileLocatorInterface $schemaFileLocator,
         SchemaFileGeneratorInterface $schemaFileGenerator = null,
         LoggerInterface $logger = null
     ){
         $this->validator = $validator;
-        $this->resourcesDir = $resourcesDir;
+        $this->schemaFileLocator = $schemaFileLocator;
         $this->schemaFileGenerator = $schemaFileGenerator;
         $this->logger = $logger;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function validateJson($json, $schemaFile)
     {
         if (!file_exists($schemaFile)) {
@@ -55,16 +74,6 @@ class JsonSchemaValidator implements JsonSchemaValidatorInterface
         return $valid;
     }
 
-    protected function getRequestSchemaFile(Request $request)
-    {
-        return sprintf("%s/request/%s.json", $this->resourcesDir, str_replace(':', '/', $request->attributes->get('_controller')));
-    }
-
-    protected function getResponseSchemaFile(Request $request)
-    {
-        return sprintf("%s/response/%s.json", $this->resourcesDir, str_replace(':', '/', $request->attributes->get('_controller')));
-    }
-
     /**
      * @inheritdoc
      */
@@ -74,7 +83,7 @@ class JsonSchemaValidator implements JsonSchemaValidatorInterface
             return;
         }
 
-        $schemaFilePath = $this->getRequestSchemaFile($request);
+        $schemaFilePath = $this->schemaFileLocator->getRequestSchemaFile($request);
 
         if (! $this->validateJson($request->getContent(), $schemaFilePath)) {
             throw new JsonSchemaValidationException($this->validator->getErrors());
@@ -90,7 +99,7 @@ class JsonSchemaValidator implements JsonSchemaValidatorInterface
             return;
         }
 
-        $schemaFilePath = $this->getResponseSchemaFile($request);
+        $schemaFilePath = $this->schemaFileLocator->getResponseSchemaFile($request, $response);
 
         if (! $this->validateJson($response->getContent(), $schemaFilePath)) {
             throw new JsonSchemaValidationException($this->validator->getErrors());

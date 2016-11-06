@@ -2,7 +2,7 @@
 
 namespace Bcastellano\JsonSchemaBundle\DependencyInjection;
 
-use Bcastellano\JsonSchemaBundle\Validator\JsonRpcSchemaValidator;
+use Bcastellano\JsonSchemaBundle\Locator\ControllerSchemaFileLocator;
 use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -16,24 +16,34 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('json_schema');
 
         $rootNode->children()
-                ->scalarNode('resources_dir')
-                    ->defaultValue('%kernel.root_dir%/../src/Resources/Schemas')
-                ->end()
                 ->arrayNode('validator')
                     ->info('Configuration for validation services')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->enumNode('class')
+                        ->scalarNode('class')
                             ->cannotBeEmpty()
                             ->defaultValue(JsonSchemaValidator::class)
-                            ->values([JsonSchemaValidator::class, JsonRpcSchemaValidator::class])
                         ->end()
                         ->booleanNode('use_listener')
                             ->defaultTrue()
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('schema_generator')
+                ->arrayNode('locator')
+                    ->info('Configuration about Json-Schema files location')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('class')
+                            ->cannotBeEmpty()
+                            ->defaultValue(ControllerSchemaFileLocator::class)
+                        ->end()
+                        ->scalarNode('resources_dir')
+                            ->cannotBeEmpty()
+                            ->defaultValue('%kernel.root_dir%/Resources/Schemas')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('generator')
                     ->info('Configuration about Json-Schema files auto generation')
                     ->canBeEnabled()
                     ->children()

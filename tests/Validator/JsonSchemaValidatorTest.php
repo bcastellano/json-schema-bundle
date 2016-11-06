@@ -3,7 +3,7 @@
 namespace Bcastellano\JsonSchemaBundle\Tests\Validator;
 
 use Bcastellano\JsonSchemaBundle\Generator\SchemaFileGeneratorInterface;
-use Bcastellano\JsonSchemaBundle\Tests\TestHiddenFunctionsTrait;
+use Bcastellano\JsonSchemaBundle\Locator\SchemaFileLocatorInterface;
 use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidatorInterface;
 use JsonSchema\Constraints\ConstraintInterface;
@@ -15,10 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
 {
-    use TestHiddenFunctionsTrait;
-
     /** @var \PHPUnit_Framework_MockObject_MockObject */
     private $baseValidator;
+
+    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    private $schemaFileLocator;
 
     /** @var \PHPUnit_Framework_MockObject_MockObject */
     private $schemaFileGenerator;
@@ -34,6 +35,7 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->baseValidator = $this->getMockBuilder(ConstraintInterface::class)->getMock();
+        $this->schemaFileLocator = $this->getMockBuilder(SchemaFileLocatorInterface::class)->getMock();
         $this->schemaFileGenerator = $this->getMockBuilder(SchemaFileGeneratorInterface::class)->getMock();
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
     }
@@ -41,6 +43,7 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         $this->baseValidator = null;
+        $this->schemaFileLocator = null;
         $this->schemaFileGenerator = null;
         $this->logger = null;
     }
@@ -49,7 +52,7 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
     {
         return new JsonSchemaValidator(
             $this->baseValidator,
-            '/some/dir',
+            $this->schemaFileLocator,
             $this->schemaFileGenerator,
             $this->logger
         );
@@ -134,10 +137,6 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->with('Content-Type')
             ->willReturn('application/json');
-        $request->attributes->expects($this->once())
-            ->method('get')
-            ->with('_controller')
-            ->willReturn('Controller:Action');
         $this->baseValidator->expects($this->once())
             ->method('getErrors')
             ->willReturn([]);
@@ -179,10 +178,6 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->with('Content-Type')
             ->willReturn('application/json');
-        $request->attributes->expects($this->once())
-            ->method('get')
-            ->with('_controller')
-            ->willReturn('Controller:Action');
         $this->baseValidator->expects($this->once())
             ->method('getErrors')
             ->willReturn([]);
@@ -209,39 +204,5 @@ class JsonSchemaValidatorTest extends \PHPUnit_Framework_TestCase
         $validator = $this->createValidatorInstance();
 
         $validator->validateResponseBody($request, $response);
-    }
-
-    public function testGetRequestSchemaFile()
-    {
-        $request = $this->getMockBuilder(Request::class)->getMock();
-        $request->attributes = $this->getMockBuilder(ParameterBag::class)->getMock();
-
-        $request->attributes->expects($this->once())
-            ->method('get')
-            ->with('_controller')
-            ->willReturn('Controller:Action');
-
-        $validator = $this->createValidatorInstance();
-
-        $actual = $this->invokeMethod($validator, 'getRequestSchemaFile', [$request]);
-
-        $this->assertSame('/some/dir/request/Controller/Action.json', $actual);
-    }
-
-    public function testGetResponseSchemaFile()
-    {
-        $request = $this->getMockBuilder(Request::class)->getMock();
-        $request->attributes = $this->getMockBuilder(ParameterBag::class)->getMock();
-
-        $request->attributes->expects($this->once())
-            ->method('get')
-            ->with('_controller')
-            ->willReturn('Controller:Action');
-
-        $validator = $this->createValidatorInstance();
-
-        $actual = $this->invokeMethod($validator, 'getResponseSchemaFile', [$request]);
-
-        $this->assertSame('/some/dir/response/Controller/Action.json', $actual);
     }
 }

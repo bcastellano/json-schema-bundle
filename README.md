@@ -47,9 +47,6 @@ public function registerBundles()
 This is a complete example of configuration parameters:
 ```yaml
 json_schema:
-    # Directory for json schema files (also to save new ones)
-    resources_dir: '%kernel.root_dir%/../src/Resources/Schemas'
-    
     # Validator
     validator:
         # Class to use in validation. Is an enum
@@ -57,8 +54,15 @@ json_schema:
         # To auto register request and response events to auto validate jsons 
         use_listener: true
     
+    # Locator
+    locator:
+        # Class to locate schema files
+        class: Bcastellano\JsonSchemaBundle\Locator\ControllerSchemaFileLocator
+        # Directory for json schema files (also to save new ones)
+        resources_dir: '%kernel.root_dir%/Resources/Schemas'
+    
     # Configuration for schema generator
-    schema_generator:
+    generator:
         enabled: false
         # NOTE: these two configurations are incompatible, you can't configure both
         # this use any external command to generate schema from json

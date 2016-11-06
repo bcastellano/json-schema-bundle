@@ -1,11 +1,19 @@
 <?php
 
-namespace Bcastellano\JsonSchemaBundle\Validator;
+namespace Bcastellano\JsonSchemaBundle\Locator;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class JsonRpcSchemaValidator extends JsonSchemaValidator
+class JsonRpcSchemaFileLocator implements SchemaFileLocatorInterface
 {
+    protected $resourcesDir;
+
+    public function __construct($resourcesDir)
+    {
+        $this->resourcesDir = $resourcesDir;
+    }
+
     /**
      * Get method name from request content
      *
@@ -27,12 +35,18 @@ class JsonRpcSchemaValidator extends JsonSchemaValidator
         return $method;
     }
 
-    protected function getRequestSchemaFile(Request $request)
+    /**
+     * @inheritdoc
+     */
+    public function getRequestSchemaFile(Request $request)
     {
         return sprintf("%s/request/%s.json", $this->resourcesDir, $this->getMethod($request));
     }
 
-    protected function getResponseSchemaFile(Request $request)
+    /**
+     * @inheritdoc
+     */
+    public function getResponseSchemaFile(Request $request, Response $response)
     {
         return sprintf("%s/response/%s.json", $this->resourcesDir, $this->getMethod($request));
     }

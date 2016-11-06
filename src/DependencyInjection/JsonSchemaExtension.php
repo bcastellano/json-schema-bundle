@@ -25,8 +25,11 @@ class JsonSchemaExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
+        // TODO modify directly services instead of set parameters, and move services.yml definitions to extension
+
         // add configuration as parameters
-        $container->setParameter('json_schema.resources_dir', $config['resources_dir']);
+        $container->setParameter('json_schema.locator.resources_dir', $config['locator']['resources_dir']);
+        $container->setParameter('json_schema.locator.class', $config['locator']['class']);
         $container->setParameter('json_schema.validator.class', $config['validator']['class']);
 
         // remove subscriber
@@ -35,18 +38,18 @@ class JsonSchemaExtension extends Extension
         }
 
         // configure schema file generator service
-        if ($this->isConfigEnabled($container, $config['schema_generator'])) {
+        if ($this->isConfigEnabled($container, $config['generator'])) {
             switch (true) {
-                case isset($config['schema_generator']['command']):
+                case isset($config['generator']['command']):
                     $def = $container->getDefinition('json_schema.file_generator');
-                    $def->addArgument($config['schema_generator']['command']);
+                    $def->addArgument($config['generator']['command']);
                     break;
-                case isset($config['schema_generator']['service']):
+                case isset($config['generator']['service']):
                     $container->removeDefinition('json_schema.file_generator');
-                    $container->setAlias('json_schema.file_generator', $config['schema_generator']['service']);
+                    $container->setAlias('json_schema.file_generator', $config['generator']['service']);
                     break;
                 default:
-                    throw new \Exception('Invalid configuration values for json_schema.schema_generator');
+                    throw new \Exception('Invalid configuration values for json_schema.generator');
             }
         } else {
             $container->removeDefinition('json_schema.file_generator');

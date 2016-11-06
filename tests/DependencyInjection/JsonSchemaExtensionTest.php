@@ -3,6 +3,7 @@
 namespace Bcastellano\JsonSchemaBundle\Tests\DependencyInjection;
 
 use Bcastellano\JsonSchemaBundle\DependencyInjection\JsonSchemaExtension;
+use Bcastellano\JsonSchemaBundle\Locator\ControllerSchemaFileLocator;
 use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -30,14 +31,15 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaults()
     {
-        $this->extension->load(['json_schema' => ['resources_dir' => '/some/dir']], $this->container);
+        $this->extension->load(['json_schema' => ['locator' => ['resources_dir' => '/some/dir']]], $this->container);
 
         $this->assertContainerHasDefinition('json_schema.base_validator');
         $this->assertContainerNotHasDefinition('json_schema.file_generator');
         $this->assertContainerHasDefinition('json_schema.validator');
         $this->assertContainerHasDefinition('json_schema.validator.subscriber');
-        $this->assertContainerParameter('/some/dir', 'json_schema.resources_dir');
+        $this->assertContainerParameter('/some/dir', 'json_schema.locator.resources_dir');
         $this->assertContainerParameter(JsonSchemaValidator::class, 'json_schema.validator.class');
+        $this->assertContainerParameter(ControllerSchemaFileLocator::class, 'json_schema.locator.class');
 
         $this->assertFalse($this->container->getDefinition('json_schema.base_validator')->isPublic());
         $this->assertTrue($this->container->getDefinition('json_schema.validator.subscriber')->hasTag('kernel.event_subscriber'));
@@ -54,7 +56,7 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function testSchemaGeneratorCommand()
     {
-        $this->extension->load(['json_schema' => ['schema_generator' => ['command' => '/path/to/cmd']]], $this->container);
+        $this->extension->load(['json_schema' => ['generator' => ['command' => '/path/to/cmd']]], $this->container);
 
         $def = $this->container->getDefinition('json_schema.file_generator');
 
@@ -64,7 +66,7 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function testSchemaGeneratorService()
     {
-        $this->extension->load(['json_schema' => ['schema_generator' => ['service' => 'some.service.id']]], $this->container);
+        $this->extension->load(['json_schema' => ['generator' => ['service' => 'some.service.id']]], $this->container);
 
         $id = 'json_schema.file_generator';
         $this->assertFalse($this->container->hasDefinition($id));
@@ -73,11 +75,11 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage Invalid configuration values for json_schema.schema_generator
+     * @expectedExceptionMessage Invalid configuration values for json_schema.generator
      */
     public function testSchemaGeneratorInvalid()
     {
-        $this->extension->load(['json_schema' => ['schema_generator' => []]], $this->container);
+        $this->extension->load(['json_schema' => ['generator' => []]], $this->container);
     }
 
     /**

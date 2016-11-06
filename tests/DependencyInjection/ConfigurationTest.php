@@ -3,6 +3,7 @@
 namespace Bcastellano\JsonSchemaBundle\Tests\DependencyInjection;
 
 use Bcastellano\JsonSchemaBundle\DependencyInjection\Configuration;
+use Bcastellano\JsonSchemaBundle\Locator\ControllerSchemaFileLocator;
 use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -13,12 +14,15 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     public function testDefaultConfig()
     {
         $defaultConfig = [
-            'resources_dir' => '%kernel.root_dir%/../src/Resources/Schemas',
             'validator' => [
                 'class' => JsonSchemaValidator::class,
                 'use_listener' => true
             ],
-            'schema_generator' => [
+            'locator' => [
+                'class' => ControllerSchemaFileLocator::class,
+                'resources_dir' => '%kernel.root_dir%/Resources/Schemas'
+            ],
+            'generator' => [
                 'enabled' => false
             ]
         ];
@@ -35,16 +39,6 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testValidatorClassInvalid()
-    {
-        $configuration = new Configuration();
-        $processor = new Processor();
-        $processor->processConfiguration($configuration, ['json_schema' => ['validator' => ['class' => \stdClass::class]]]);
-    }
-
-    /**
-     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testValidatorClassNotEmpty()
     {
         $configuration = new Configuration();
@@ -55,11 +49,31 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
+    public function testLocatorClassNotEmpty()
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $processor->processConfiguration($configuration, ['json_schema' => ['locator' => ['class' => '']]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testLocatorResourcesDirNotEmpty()
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $processor->processConfiguration($configuration, ['json_schema' => ['locator' => ['resources_dir' => '']]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
     public function testSchemaGeneratorIncompatibleConfig()
     {
         $configuration = new Configuration();
         $processor = new Processor();
-        $processor->processConfiguration($configuration, ['json_schema' => ['schema_generator' => ['command' => 'cmd',  'service' => 'some.service.name']]]);
+        $processor->processConfiguration($configuration, ['json_schema' => ['generator' => ['command' => 'cmd',  'service' => 'some.service.name']]]);
     }
 
     /**
@@ -69,7 +83,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     {
         $configuration = new Configuration();
         $processor = new Processor();
-        $processor->processConfiguration($configuration, ['json_schema' => ['schema_generator' => ['command' => '']]]);
+        $processor->processConfiguration($configuration, ['json_schema' => ['generator' => ['command' => '']]]);
     }
 
     /**
@@ -79,6 +93,6 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     {
         $configuration = new Configuration();
         $processor = new Processor();
-        $processor->processConfiguration($configuration, ['json_schema' => ['schema_generator' => ['service' => '']]]);
+        $processor->processConfiguration($configuration, ['json_schema' => ['generator' => ['service' => '']]]);
     }
 }

@@ -4,6 +4,12 @@ services:
         class: JsonSchema\Validator
         public: false
 
+    # File locator service
+    json_schema.file_locator:
+        class: "%json_schema.locator.class%"
+        arguments: ["%json_schema.locator.resources_dir%"]
+        public: false
+
     # File generator service
     json_schema.file_generator:
         class: Bcastellano\JsonSchemaBundle\Generator\CliSchemaFileGenerator
@@ -15,7 +21,7 @@ services:
         class: "%json_schema.validator.class%"
         arguments:
             - "@json_schema.base_validator"
-            - "%json_schema.resources_dir%"
+            - "@json_schema.file_locator"
             - "@json_schema.file_generator"
             - "@logger"
 
