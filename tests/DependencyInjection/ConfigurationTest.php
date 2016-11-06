@@ -3,6 +3,7 @@
 namespace Bcastellano\JsonSchemaBundle\Tests\DependencyInjection;
 
 use Bcastellano\JsonSchemaBundle\DependencyInjection\Configuration;
+use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
@@ -13,7 +14,13 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     {
         $defaultConfig = [
             'resources_dir' => '%kernel.root_dir%/../src/Resources/Schemas',
-            'use_listener' => true
+            'validator' => [
+                'class' => JsonSchemaValidator::class,
+                'use_listener' => true
+            ],
+            'schema_generator' => [
+                'enabled' => false
+            ]
         ];
 
         $configuration = new Configuration();
@@ -23,6 +30,26 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(ConfigurationInterface::class, $configuration);
         $this->assertInstanceOf(TreeBuilder::class, $configuration->getConfigTreeBuilder());
         $this->assertEquals($defaultConfig, $config);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testValidatorClassInvalid()
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $processor->processConfiguration($configuration, ['json_schema' => ['validator' => ['class' => \stdClass::class]]]);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testValidatorClassNotEmpty()
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $processor->processConfiguration($configuration, ['json_schema' => ['validator' => ['class' => '']]]);
     }
 
     /**

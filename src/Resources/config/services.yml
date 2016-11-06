@@ -12,7 +12,7 @@ services:
 
     # Validator class
     json_schema.validator:
-        class: Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator
+        class: "%json_schema.validator.class%"
         arguments:
             - "@json_schema.base_validator"
             - "%json_schema.resources_dir%"

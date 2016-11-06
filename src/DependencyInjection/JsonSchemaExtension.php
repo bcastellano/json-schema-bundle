@@ -27,14 +27,15 @@ class JsonSchemaExtension extends Extension
 
         // add configuration as parameters
         $container->setParameter('json_schema.resources_dir', $config['resources_dir']);
+        $container->setParameter('json_schema.validator.class', $config['validator']['class']);
 
         // remove subscriber
-        if (false === $config['use_listener']) {
+        if (false === $config['validator']['use_listener']) {
             $container->removeDefinition('json_schema.validator.subscriber');
         }
 
         // configure schema file generator service
-        if (isset($config['schema_generator'])) {
+        if ($this->isConfigEnabled($container, $config['schema_generator'])) {
             switch (true) {
                 case isset($config['schema_generator']['command']):
                     $def = $container->getDefinition('json_schema.file_generator');

@@ -3,6 +3,7 @@
 namespace Bcastellano\JsonSchemaBundle\Tests\DependencyInjection;
 
 use Bcastellano\JsonSchemaBundle\DependencyInjection\JsonSchemaExtension;
+use Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
@@ -36,15 +37,17 @@ class JsonSchemaExtensionTest extends \PHPUnit_Framework_TestCase
         $this->assertContainerHasDefinition('json_schema.validator');
         $this->assertContainerHasDefinition('json_schema.validator.subscriber');
         $this->assertContainerParameter('/some/dir', 'json_schema.resources_dir');
+        $this->assertContainerParameter(JsonSchemaValidator::class, 'json_schema.validator.class');
 
         $this->assertFalse($this->container->getDefinition('json_schema.base_validator')->isPublic());
         $this->assertTrue($this->container->getDefinition('json_schema.validator.subscriber')->hasTag('kernel.event_subscriber'));
         $this->assertNull($this->container->getDefinition('json_schema.validator')->getArgument(2));
+        $this->assertEquals($this->container->getDefinition('json_schema.validator')->getClass(), '%json_schema.validator.class%');
     }
 
     public function testDisableSubscriber()
     {
-        $this->extension->load(['json_schema' => ['use_listener' => false]], $this->container);
+        $this->extension->load(['json_schema' => ['validator' => ['use_listener' => false]]], $this->container);
 
         $this->assertContainerNotHasDefinition('json_schema.validator.subscriber');
     }

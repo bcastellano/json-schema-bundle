@@ -50,11 +50,16 @@ json_schema:
     # Directory for json schema files (also to save new ones)
     resources_dir: '%kernel.root_dir%/../src/Resources/Schemas'
     
-    # To auto register request and response events to auto validate jsons 
-    use_listener: true
+    # Validator
+    validator:
+        # Class to use in validation. Is an enum
+        class: Bcastellano\JsonSchemaBundle\Validator\JsonSchemaValidator
+        # To auto register request and response events to auto validate jsons 
+        use_listener: true
     
     # Configuration for schema generator
     schema_generator:
+        enabled: false
         # NOTE: these two configurations are incompatible, you can't configure both
         # this use any external command to generate schema from json
         command: '/path/to/command {{source_file}} --output {{target_file}}'
