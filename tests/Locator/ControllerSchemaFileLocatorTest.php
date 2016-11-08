@@ -4,12 +4,15 @@ namespace Bcastellano\JsonSchemaBundle\Tests\Locator;
 
 use Bcastellano\JsonSchemaBundle\Locator\ControllerSchemaFileLocator;
 use Bcastellano\JsonSchemaBundle\Locator\SchemaFileLocatorInterface;
+use Bcastellano\JsonSchemaBundle\Tests\TestHiddenFunctionsTrait;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ControllerSchemaFileLocatorTest extends \PHPUnit_Framework_TestCase
 {
+    use TestHiddenFunctionsTrait;
+
     /** @var ControllerSchemaFileLocator */
     private $locator;
 
@@ -57,5 +60,12 @@ class ControllerSchemaFileLocatorTest extends \PHPUnit_Framework_TestCase
         $actual = $this->locator->getResponseSchemaFile($request, $response);
 
         $this->assertSame('/resources/dir/response/Controller/Action.json', $actual);
+    }
+    
+    public function testControllerNames()
+    {
+        $this->assertSame('kernel/actionExample', $this->invokeMethod($this->locator, 'parseControllerName', ['kernel:actionExample']));
+        $this->assertSame('SomeBundle/Controller/ActionExample', $this->invokeMethod($this->locator, 'parseControllerName', ['SomeBundle:Controller:ActionExample']));
+        $this->assertSame('ControllerName/ActionExample', $this->invokeMethod($this->locator, 'parseControllerName', ['SomeBundle\Controller\ControllerName::ActionExample']));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Bcastellano\JsonSchemaBundle\Generator;
 
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -32,7 +33,10 @@ class CliSchemaFileGenerator implements SchemaFileGeneratorInterface
         $fs = new Filesystem();
 
         // generate temp file
-        $tmpJson = $fs->tempnam(sys_get_temp_dir(), basename($file));
+        if (false === ($tmpJson = tempnam(sys_get_temp_dir(), basename($file)))) {
+            throw new IOException('A temporary file could not be created.');
+        }
+
         $fs->dumpFile($tmpJson, $json);
 
         // substitute parameters
